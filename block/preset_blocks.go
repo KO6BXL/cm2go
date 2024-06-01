@@ -60,19 +60,34 @@ func FLIPFLOP() *Base {
 	return block
 }
 
+// Default: (175, 175, 175), 100, 25, false
+type LEDParams struct {
+	Color      Color
+	OpacityOn  uint8
+	OpacityOff uint8
+	Analog     bool
+}
+
 // If any input is on, output is on, produces light. If analog is true, less inputs on, lower the opacity is
-func LED(color Color, opacityOn uint8, opacityOff uint8, analog bool) *Base {
+func LED(params LEDParams) *Base {
 	block := new(Base)
 	block.name = "LED"
 	block.id = 6
-	block.color = color
+	block.color = params.Color
 
 	var analogOn int32 = 0
-	if analog {
+	if params.Analog {
 		analogOn = 1
 	}
 
-	block.properties = []int32{int32(color.R), int32(color.G), int32(color.B), int32(opacityOn), int32(opacityOff), analogOn}
+	block.properties = []int32{
+		int32(params.Color.R),
+		int32(params.Color.G),
+		int32(params.Color.B),
+		int32(params.OpacityOn),
+		int32(params.OpacityOff),
+		analogOn,
+	}
 
 	return block
 }
