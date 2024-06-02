@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-	var connections block.Connections
 	var collection block.Collection
 
 	toggle := collection.Append(block.FLIPFLOP())
@@ -14,9 +13,9 @@ func main() {
 
 	led := collection.Append(block.LED(nil))
 
-	connections.Connect(toggle, led)
+	collection.Connect(toggle, led)
 
-	output, err := build.FastCompile([]block.Collection{collection}, []block.Connections{connections})
+	output, err := build.FastCompile([]block.Collection{collection})
 	if err != nil {
 		panic(err)
 	}
