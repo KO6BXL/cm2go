@@ -69,7 +69,13 @@ type LEDParams struct {
 }
 
 // If any input is on, output is on, produces light. If analog is true, less inputs on, lower the opacity is
-func LED(params LEDParams) *Base {
+func LED(params *LEDParams) *Base {
+	useDefault := false
+	if params == nil {
+		params = &LEDParams{Color: Color{R: 175, G: 175, B: 175}, OpacityOn: 100, OpacityOff: 25, Analog: false}
+		useDefault = true
+	}
+
 	block := new(Base)
 	block.name = "LED"
 	block.id = 6
@@ -80,13 +86,15 @@ func LED(params LEDParams) *Base {
 		analogOn = 1
 	}
 
-	block.properties = []int32{
-		int32(params.Color.R),
-		int32(params.Color.G),
-		int32(params.Color.B),
-		int32(params.OpacityOn),
-		int32(params.OpacityOff),
-		analogOn,
+	if !useDefault {
+		block.properties = []int32{
+			int32(params.Color.R),
+			int32(params.Color.G),
+			int32(params.Color.B),
+			int32(params.OpacityOn),
+			int32(params.OpacityOff),
+			analogOn,
+		}
 	}
 
 	return block
