@@ -5,46 +5,49 @@ import (
 	"errors"
 	"slices"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/nameless9000/cm2go/block"
 )
 
-// converts a block to its compiled string representation
-func blockToString(block *block.Base) string {
-	blockString := strconv.FormatUint(uint64(block.Id()), 10)
-
-	blockString += ","
-	if block.State {
-		blockString += "1"
+func timer(name string) func() {
+	start := time.Now()
+	return func() {
+		println(name, "took", time.Since(start).Microseconds(), "microseconds\n")
 	}
-	blockString += ","
-	blockString += strconv.FormatFloat(float64(block.Offset.X), 'g', 8, 32)
-	blockString += ","
-	blockString += strconv.FormatFloat(float64(block.Offset.Y), 'g', 8, 32)
-	blockString += ","
-	blockString += strconv.FormatFloat(float64(block.Offset.Z), 'g', 8, 32)
-	blockString += ","
-
-	count := 0
-	for _, property := range block.Properties() {
-		blockString += strconv.FormatInt(int64(property), 10) + "+"
-		count++
-	}
-
-	if count != 0 {
-		return blockString[:len(blockString)-1]
-	}
-
-	return blockString
 }
 
-type CompileFlags struct {
+// converts a block to its compiled string representation
+func writeBlockString(block *block.Base, stringBuilder *strings.Builder) {
+	stringBuilder.WriteString(strconv.FormatUint(uint64(block.Id()), 10))
+
+	stringBuilder.WriteRune(',')
+	if block.State {
+		stringBuilder.WriteRune(',')
+	}
+	stringBuilder.WriteRune(',')
+	stringBuilder.WriteString(strconv.FormatFloat(float64(block.Offset.X), 'g', 8, 32))
+	stringBuilder.WriteRune(',')
+	stringBuilder.WriteString(strconv.FormatFloat(float64(block.Offset.Y), 'g', 8, 32))
+	stringBuilder.WriteRune(',')
+	stringBuilder.WriteString(strconv.FormatFloat(float64(block.Offset.Z), 'g', 8, 32))
+	stringBuilder.WriteRune(',')
+
+	properties := len(block.Properties())
+	for count, property := range block.Properties() {
+		stringBuilder.WriteString(strconv.FormatInt(int64(property), 10))
+
+		if count != properties {
+			stringBuilder.WriteRune('+')
+		}
+	}
 }
 
 // standard collection compilation
-func Compile(collectionList []block.Collection, flags CompileFlags) (output string, err error) {
-	var blockOutput string
-	var connectionOutput string
+func Compile(collectionList []block.Collection) (output string, err error) {
+	defer timer("Compile")()
+	var stringBuilder strings.Builder
 
 	var allConnections []*block.Connection = make([]*block.Connection, 0)
 	var allBlocks []*block.Base = make([]*block.Base, 0)
@@ -77,39 +80,52 @@ func Compile(collectionList []block.Collection, flags CompileFlags) (output stri
 	// convert them to strings
 	var blockIndexes map[*block.Base]uint32 = make(map[*block.Base]uint32)
 
+	blockLen := len(allBlocks)
 	for count, block := range allBlocks {
 		blockIndexes[block] = uint32(count) + 1
 
-		blockOutput += blockToString(block) + ";"
+		writeBlockString(block, &stringBuilder)
+		if count != blockLen-1 {
+			stringBuilder.WriteRune(';')
+		}
 	}
+	println("Block count:", blockLen)
 
-	for _, connection := range allConnections {
+	stringBuilder.WriteString("?")
+
+	connectionLen := len(allConnections)
+	for count, connection := range allConnections {
 		from := strconv.FormatUint(uint64(blockIndexes[connection.From]), 10)
 		to := strconv.FormatUint(uint64(blockIndexes[connection.To]), 10)
 
-		connectionOutput += from + "," + to + ";"
+		stringBuilder.WriteString(from)
+		stringBuilder.WriteRune(',')
+		stringBuilder.WriteString(to)
+		if count != connectionLen-1 {
+			stringBuilder.WriteRune(';')
+		}
 	}
+	println("Connection count:", connectionLen)
 
-	// remove last semicolon and return
-	if connectionOutput != "" {
-		connectionOutput = connectionOutput[:len(connectionOutput)-1]
-	}
+	stringBuilder.WriteString("??")
 
-	output = blockOutput[:len(blockOutput)-1] + "?" + connectionOutput + "??"
+	output = stringBuilder.String()
 	return
 }
 
 // Fast, O(blocks+connections) compilation for debugging and testing
 func FastCompile(collectionList []block.Collection) (output string, err error) {
-	var blockOutput string
-	var connectionOutput string
+	defer timer("Compile")()
+	var stringBuilder strings.Builder
 
 	var blockIndexes map[*block.Base]uint32 = make(map[*block.Base]uint32)
 	var blockCount uint32 = 1
 
 	// compile
-	for _, blocks := range collectionList {
-		for _, block := range blocks.Blocks {
+	for collectionCount, blocks := range collectionList {
+		isLast := collectionCount == len(collectionList)-1
+		blockLen := len(blocks.Blocks)
+		for count, block := range blocks.Blocks {
 			block.Offset.X += blocks.Position.X
 			block.Offset.Y += blocks.Position.Y
 			block.Offset.Z += blocks.Position.Z
@@ -117,28 +133,43 @@ func FastCompile(collectionList []block.Collection) (output string, err error) {
 			blockIndexes[block] = blockCount
 			blockCount++
 
-			blockOutput += blockToString(block) + ";"
+			writeBlockString(block, &stringBuilder)
+			if !isLast || count != blockLen-1 {
+				stringBuilder.WriteRune(';')
+			}
 		}
 	}
+	println("Block count:", blockCount-1)
+
+	stringBuilder.WriteString("?")
+
 	// outside to allow for cross-collection connecting
-	for _, blocks := range collectionList {
-		for _, connection := range blocks.Connections {
+	connectionCount := 0
+	for collectionCount, blocks := range collectionList {
+		isLast := collectionCount == len(collectionList)-1
+		connectionLen := len(blocks.Connections)
+		for count, connection := range blocks.Connections {
 			from := strconv.FormatUint(uint64(blockIndexes[connection.From]), 10)
 			to := strconv.FormatUint(uint64(blockIndexes[connection.To]), 10)
 
-			connectionOutput += from + "," + to + ";"
+			stringBuilder.WriteString(from)
+			stringBuilder.WriteRune(',')
+			stringBuilder.WriteString(to)
+			if !isLast || count != connectionLen-1 {
+				stringBuilder.WriteRune(';')
+			}
+			connectionCount++
 		}
 	}
+	println("Connection count:", connectionCount)
 
 	if blockCount == 1 {
 		err = errors.New("at least 1 block is required")
 		return
 	}
 
-	if connectionOutput != "" {
-		connectionOutput = connectionOutput[:len(connectionOutput)-1]
-	}
+	stringBuilder.WriteString("??")
 
-	output = blockOutput[:len(blockOutput)-1] + "?" + connectionOutput + "??"
+	output = stringBuilder.String()
 	return
 }

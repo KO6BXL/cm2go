@@ -6,7 +6,7 @@ import (
 	"github.com/nameless9000/cm2go/memory"
 )
 
-func memoryCell() {
+func memoryCell() string {
 	cellCollection, cell := memory.NewMemoryCell()
 	cellCollection.Position.Y = 3
 
@@ -23,20 +23,21 @@ func memoryCell() {
 	write.Offset.X = 1
 	input.Offset.X = 2
 
-	output, err := build.FastCompile([]block.Collection{cellCollection, inputCollection})
+	output, err := build.Compile([]block.Collection{cellCollection, inputCollection})
 	if err != nil {
 		panic(err)
 	}
 
-	println(output)
+	return output
 }
 
-func register() {
+func register() string {
 	var bits uint16 = 8
 
 	collection, register := memory.NewRegister(bits)
 	collection.Position.Z = 1
 
+	// inputs
 	var inputCollection block.Collection
 
 	writeBit := inputCollection.Append(block.BUTTON())
@@ -58,17 +59,16 @@ func register() {
 		inputCollection.Connect(output, led)
 	}
 
-	output, err := build.FastCompile([]block.Collection{collection, inputCollection})
+	// compile and return
+	output, err := build.Compile([]block.Collection{collection, inputCollection})
 	if err != nil {
 		panic(err)
 	}
 
-	println(output)
+	return output
 }
 
 func main() {
-	println("Memory Cell:")
-	memoryCell()
-	println("\nRegister:")
-	register()
+	println(memoryCell())
+	println(register())
 }
