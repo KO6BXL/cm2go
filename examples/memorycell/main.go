@@ -1,39 +1,19 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/nameless9000/cm2go/block"
 	"github.com/nameless9000/cm2go/build"
 	"github.com/nameless9000/cm2go/memory"
 )
 
-func memoryCell() string {
-	cellCollection, cell := memory.NewMemoryCell()
-	cellCollection.Position.Y = 3
-
-	var inputCollection block.Collection
-
-	led := inputCollection.Append(block.LED(nil))
-	input := inputCollection.Append(block.FLIPFLOP())
-	write := inputCollection.Append(block.FLIPFLOP())
-
-	inputCollection.Connect(cell.Output, led)
-	inputCollection.Connect(input, cell.Input)
-	inputCollection.Connect(write, cell.WriteBit)
-
-	write.Offset.X = 1
-	input.Offset.X = 2
-
-	output, err := build.Compile([]block.Collection{cellCollection, inputCollection})
-	if err != nil {
-		panic(err)
-	}
-
-	return output
-}
-
-func register() string {
-	var bits uint16 = 8
-
+func register(bits uint32) string {
 	collection, register := memory.NewRegister(bits)
 	collection.Position.Z = 1
 
@@ -60,7 +40,7 @@ func register() string {
 	}
 
 	// compile and return
-	output, err := build.Compile([]block.Collection{collection, inputCollection})
+	output, err := build.FastCompile([]block.Collection{collection, inputCollection})
 	if err != nil {
 		panic(err)
 	}
@@ -69,6 +49,18 @@ func register() string {
 }
 
 func main() {
-	println(memoryCell())
-	println(register())
+	println("Enter amount of bits: ")
+
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	bits, err := strconv.ParseUint(strings.TrimSpace(input), 10, 32)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(register(uint32(bits)))
 }

@@ -35,12 +35,12 @@ type Register struct {
 }
 
 // Size: x=0-3 y=0-bits
-func NewRegister(bits uint16) (collection block.Collection, register Register) {
+func NewRegister(bits uint32) (collection block.Collection, register Register) {
 	writeBit := collection.Append(block.NODE())
 	writeBit.Offset.X = 3
 	register.WriteBit = writeBit
 
-	var bit uint16
+	var bit uint32
 	for ; bit < bits; bit++ {
 		flipflop := collection.Append(block.FLIPFLOP())
 		and := collection.Append(block.AND())
