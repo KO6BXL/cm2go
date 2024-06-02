@@ -187,7 +187,7 @@ func TILE(color Color, material uint8) *Base {
 func NODE() *Base {
 	block := new(Base)
 	block.name = "NODE"
-	block.id = 14
+	block.id = 15
 	block.color = Color{R: 165, G: 177, B: 200}
 
 	return block
@@ -197,7 +197,7 @@ func NODE() *Base {
 func DELAY(ticks uint16) *Base {
 	block := new(Base)
 	block.name = "DELAY"
-	block.id = 14
+	block.id = 16
 	block.color = Color{R: 98, G: 24, B: 148}
 	block.properties = []int32{int32(ticks)}
 
@@ -208,7 +208,7 @@ func DELAY(ticks uint16) *Base {
 func ANTENNA(channel uint16) *Base {
 	block := new(Base)
 	block.name = "ANTENNA"
-	block.id = 14
+	block.id = 17
 	block.color = Color{R: 235, G: 233, B: 183}
 	block.properties = []int32{int32(channel)}
 
@@ -219,7 +219,7 @@ func ANTENNA(channel uint16) *Base {
 func CONDUCTORV2() *Base {
 	block := new(Base)
 	block.name = "CONDUCTORV2"
-	block.id = 14
+	block.id = 18
 	block.color = Color{R: 52, G: 132, B: 182}
 
 	return block
