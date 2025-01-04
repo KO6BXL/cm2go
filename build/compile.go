@@ -38,7 +38,7 @@ func writeBlockString(block *block.Base, stringBuilder *strings.Builder) {
 	for count, property := range block.Properties() {
 		stringBuilder.WriteString(strconv.FormatInt(int64(property), 10))
 
-		if count != properties {
+		if count != properties-1 {
 			stringBuilder.WriteRune('+')
 		}
 	}
