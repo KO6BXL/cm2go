@@ -24,7 +24,7 @@ func writeBlockString(block *block.Base, stringBuilder *strings.Builder) {
 
 	stringBuilder.WriteRune(',')
 	if block.State {
-		stringBuilder.WriteRune(',')
+		stringBuilder.WriteRune('1')
 	}
 	stringBuilder.WriteRune(',')
 	stringBuilder.WriteString(strconv.FormatFloat(float64(block.Offset.X), 'g', 8, 32))

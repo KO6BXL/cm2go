@@ -56,7 +56,7 @@ func FLIPFLOP() *Base {
 	block.name = "FLIPFLOP"
 	block.id = 5
 	block.color = Color{R: 30, G: 30, B: 30}
-
+	block.properties = []int32{2, 0}
 	return block
 }
 
