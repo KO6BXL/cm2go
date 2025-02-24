@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/nameless9000/cm2go/block"
+import "github.com/ko6bxl/cm2go/block"
 
 type MemoryCell struct {
 	Output   *block.Base

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nameless9000/cm2go/block"
+	"github.com/ko6bxl/cm2go/block"
 )
 
 func timer(name string) func() {

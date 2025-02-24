@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/nameless9000/cm2go/block"
-	"github.com/nameless9000/cm2go/build"
-	"github.com/nameless9000/cm2go/memory"
+	"github.com/ko6bxl/cm2go/block"
+	"github.com/ko6bxl/cm2go/build"
+	"github.com/ko6bxl/cm2go/memory"
 )
 
 func register(bits uint32) string {

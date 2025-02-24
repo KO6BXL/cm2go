@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/nameless9000/cm2go/block"
-	"github.com/nameless9000/cm2go/build"
+	"github.com/ko6bxl/cm2go/block"
+	"github.com/ko6bxl/cm2go/build"
 )
 
 func main() {
