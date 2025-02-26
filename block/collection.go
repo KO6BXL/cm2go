@@ -28,7 +28,7 @@ func (collection *Collection) Connect(from *Base, to ...*Base) {
 }
 
 // Merges the collection's blocks and connections
-func (collection *Collection) Merge(with ...*Collection) {
+func (collection Collection) Merge(with ...Collection) {
 	for _, toMerge := range with {
 		for _, block := range toMerge.Blocks {
 			block.Offset.X += toMerge.Position.X
