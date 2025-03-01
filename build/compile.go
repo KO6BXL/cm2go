@@ -173,3 +173,49 @@ func FastCompile(collectionList []block.Collection) (output string, err error) {
 	output = stringBuilder.String()
 	return
 }
+
+func MemCompile(data []uint8) (string, error) {
+
+	hextable := []string{
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+		"A",
+		"B",
+		"C",
+		"D",
+		"E",
+		"F",
+	}
+	var out string
+	if len(data) > 4096 {
+		return out, errors.New("Too much data for massMemory")
+	}
+
+	var popbits int
+	for i, x := range data {
+		var hex string
+		var lb uint8
+		var hb uint8
+
+		hb = x >> 4
+		lb = (x << 4) >> 4
+		hex = hex + hextable[hb]
+		hex = hex + hextable[lb]
+		out = out + hex
+		popbits = i
+	}
+
+	for range 4096 - popbits {
+		out = out + "00"
+	}
+
+	return out, nil
+}
